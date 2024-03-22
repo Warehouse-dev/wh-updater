@@ -1,0 +1,26 @@
+name: Amax Updater Build
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - name: Checkout sources
+      uses: actions/checkout@v4
+      
+    - name: Build release [msvc]
+      run: cargo build --release --target=i686-pc-windows-msvc
+
+    - name: Collect release artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: wh-updater.exe
+        path: |
+          ./target/i686-pc-windows-msvc/release/wh-updater.exe
