@@ -65,7 +65,7 @@ pub fn update_foc() {
         }
     };
 
-    foc_coal_update(game_path, updater);
+    //foc_coal_update(game_path, updater);
 }
 
 fn get_foc_path() -> Result<PathBuf> {
