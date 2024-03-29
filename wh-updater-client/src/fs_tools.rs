@@ -24,7 +24,13 @@ impl WHUpdateClient {
         for i in 0..archive.len() {
             let mut file = archive.by_index(i).unwrap();
             let outpath = match file.enclosed_name() {
+
+                
+
                 Some(path) => {
+                    
+                    self.base_updated_files.push(path.to_owned());
+
                     let temp_path = base_path.join(path.to_owned());
 
                     match path.parent() {
@@ -41,6 +47,7 @@ impl WHUpdateClient {
                 }
                 None => continue,
             };
+
 
             {
                 let comment = file.comment();
@@ -164,7 +171,20 @@ impl WHUpdateClient {
 
     pub fn apply_update(&mut self) {
         info!("Applying an update...");
-        for file_path in &self.update_files {
+        for file_path in &self.base_updated_files {
+
+            let temp = &self.temp_path.join(file_path);
+
+            match fs::metadata(temp){
+                Ok(metadata) => {
+                    if metadata.is_dir() {
+                        continue;
+                    }
+                },
+                Err(_) => continue,
+            };
+
+            info!("{:?}",&self.game_path.join(file_path));
 
             let _ = fs::rename(
                 &self.temp_path.join(file_path),
@@ -185,11 +205,14 @@ impl WHUpdateClient {
             let _ = fs::remove_dir_all(&self.game_path.join(".wh_bak"));
             let _ = fs::create_dir_all(&self.game_path.join(".wh_bak"));
 
-            for file_to_backup in self.update_files.clone() {
+
+            
+            for file_to_backup in self.base_updated_files.clone() {
 
 
 
                 let temp_path = &self.game_path.join(&file_to_backup);
+                info!("temp {:?}",temp_path);
 
                 match fs::metadata(temp_path){
                     Ok(metadata) => {
@@ -204,6 +227,8 @@ impl WHUpdateClient {
                 //let file_name = path_final.file_name().unwrap_or_default().to_str().unwrap_or_default();
 
                 let path_final = &self.game_path.join(".wh_bak").join(&file_to_backup);
+
+                info!("File to backup: {:?}",path_final);
 
                 if let Some(p) = path_final.parent() {
                     if !p.exists() {

@@ -18,7 +18,8 @@ pub struct WHUpdateClient {
     pub temp_path: PathBuf,
     pub game_path: PathBuf,
     pub game: WHGames,
-    update_files: Vec<String>,
+    update_files: Vec<String>, 
+    base_updated_files: Vec<PathBuf>, 
     pub remote_version: String,
     pub local_version: Option<String>,
     pub update_base_url: String
@@ -59,6 +60,7 @@ impl WHUpdateClient {
         }.to_owned();
 
         let update_files = vec![];
+        let base_updated_files = vec![];
         let remote_version = String::from("0.0.0.0");
         
         Self {
@@ -67,6 +69,7 @@ impl WHUpdateClient {
             game_path,
             game,
             update_files,
+            base_updated_files,
             remote_version,
             local_version: None,
             update_base_url
