@@ -4,6 +4,8 @@ use console::{StyledObject, Term};
 use env_logger::{Builder, Target};
 use log::LevelFilter;
 
+use native_dialog::MessageDialog;
+use native_dialog::MessageType;
 use wh_updater_client::WHGames;
 use std::io::Write;
 
@@ -88,12 +90,12 @@ fn main() {
     //     cyan.apply_to("An update is available! Updating files...")
     // );
 
-    // let _yes = MessageDialog::new()
-    // .set_type(MessageType::Info)
-    // .set_title("WH updater")
-    // .set_text("Update was successful!")
-    // .show_alert()
-    // .unwrap();
+    let _yes = MessageDialog::new()
+    .set_type(MessageType::Info)
+    .set_title("WH updater")
+    .set_text("Update was successful!")
+    .show_alert()
+    .unwrap();
 
 
 }

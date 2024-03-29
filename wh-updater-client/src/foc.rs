@@ -74,7 +74,7 @@ fn get_foc_path() -> Result<PathBuf> {
     match fs::metadata(Path::new("./TFOC.exe")) {
         Ok(_) => {
             info!("Found TFOC.exe!");
-            let mut path = PathBuf::from(".");
+            let mut path = PathBuf::from(".").canonicalize().unwrap();
             path.pop();
             return Ok(path);
         }
@@ -84,7 +84,7 @@ fn get_foc_path() -> Result<PathBuf> {
     match fs::metadata(Path::new("./Binaries/TFOC.exe")) {
         Ok(_) => {
             info!("Found TFOC.exe!");
-            return Ok(PathBuf::from("."));
+            return Ok(PathBuf::from(".").canonicalize().unwrap());
         }
         Err(_) => {}
     }

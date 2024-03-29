@@ -1,4 +1,4 @@
-use std::{fs, io, path::{Path, PathBuf}};
+use std::{fs, io, path::{Path, PathBuf}, str::FromStr};
 use anyhow::{anyhow, Result};
 use log::info;
 use crate::WHUpdateClient;
@@ -187,11 +187,33 @@ impl WHUpdateClient {
 
             for file_to_backup in self.update_files.clone() {
 
+
+
                 let temp_path = &self.game_path.join(&file_to_backup);
+
+                match fs::metadata(temp_path){
+                    Ok(metadata) => {
+                        if metadata.is_dir() {
+                            continue;
+                        }
+                    },
+                    Err(_) => continue,
+                };
+
+                //let path_final = PathBuf::from_str(&file_to_backup).unwrap_or_default();
+                //let file_name = path_final.file_name().unwrap_or_default().to_str().unwrap_or_default();
+
+                let path_final = &self.game_path.join(".wh_bak").join(&file_to_backup);
+
+                if let Some(p) = path_final.parent() {
+                    if !p.exists() {
+                        fs::create_dir_all(p).unwrap();
+                    }
+                }
 
                 let _ = fs::rename(
                     temp_path,
-                    &self.game_path.join(".wh_bak").join(&file_to_backup),
+                    path_final
                 );
             }
 
