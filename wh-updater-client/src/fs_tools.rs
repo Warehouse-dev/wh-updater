@@ -8,6 +8,7 @@ use crate::WHUpdateClient;
 
 impl WHUpdateClient {
     pub fn unpack_update(&mut self, path: PathBuf) -> Result<Vec<PathBuf>> {
+
         let fname = path;
 
         let base_path = match fname.parent() {
@@ -23,39 +24,28 @@ impl WHUpdateClient {
 
         for i in 0..archive.len() {
             let mut file = archive.by_index(i).unwrap();
-            let outpath = match file.enclosed_name() {
-
-                
+            let outpath = match file.enclosed_name() {                
 
                 Some(path) => {
+                    info!("{}",path.display());
                     
-                    self.base_updated_files.push(path.to_owned());
+                    let path = PathBuf::from(path.to_str().unwrap().replace("/", "\\"));
+                    info!("{}",path.display());
 
-                    let temp_path = base_path.join(path.to_owned());
+                    self.base_updated_files.push(path.clone());
 
-                    match path.parent() {
-                        Some(parent) => {
-                            if parent == Path::new("") {
-                                self.update_files.push(path.to_str().unwrap().to_owned())
-                            }
-                        }
-                        None => {}
-                    };
+                    let temp = base_path.join(path.clone());
 
-                    extracted_files.push(temp_path.to_owned());
+                    let temp_path = PathBuf::from(&temp);
+
+                    self.update_files.push(temp_path.clone());
                     temp_path
                 }
                 None => continue,
             };
 
-
-            {
-                let comment = file.comment();
-                if !comment.is_empty() {
-                    println!("File {i} comment: {comment}");
-                }
-            }
-
+            info!("{}",outpath.display());
+            
             if (*file.name()).ends_with('/') {
                 println!("File {} extracted to \"{}\"", i, outpath.display());
                 fs::create_dir_all(&outpath).unwrap();
@@ -74,6 +64,7 @@ impl WHUpdateClient {
                 }
                 let mut outfile = fs::File::create(&outpath).unwrap();
                 io::copy(&mut file, &mut outfile).unwrap();
+
             }
 
             // Get and Set permissions
@@ -102,72 +93,72 @@ impl WHUpdateClient {
     }
 }   
 
-    pub fn unpack_zip(path: PathBuf) -> Result<Vec<PathBuf>> {
-        let fname = path;
+    // pub fn unpack_zip(path: PathBuf) -> Result<Vec<PathBuf>> {
+    //     let fname = path;
 
-        let base_path = match fname.parent() {
-            Some(path) => path.to_owned(),
-            None => PathBuf::new(),
-        };
+    //     let base_path = match fname.parent() {
+    //         Some(path) => path.to_owned(),
+    //         None => PathBuf::new(),
+    //     };
 
-        let mut extracted_files: Vec<PathBuf> = vec![];
+    //     let mut extracted_files: Vec<PathBuf> = vec![];
 
-        let file = fs::File::open(fname).unwrap();
+    //     let file = fs::File::open(fname).unwrap();
 
-        let mut archive = zip::ZipArchive::new(file).unwrap();
+    //     let mut archive = zip::ZipArchive::new(file).unwrap();
 
-        for i in 0..archive.len() {
-            let mut file = archive.by_index(i).unwrap();
-            let outpath = match file.enclosed_name() {
-                Some(path) => {
-                    let temp_path = base_path.join(path.to_owned());
+    //     for i in 0..archive.len() {
+    //         let mut file = archive.by_index(i).unwrap();
+    //         let outpath = match file.enclosed_name() {
+    //             Some(path) => {
+    //                 let temp_path = base_path.join(path.to_owned());
 
-                    extracted_files.push(temp_path.to_owned());
-                    temp_path
-                }
-                None => continue,
-            };
+    //                 extracted_files.push(temp_path.to_owned());
+    //                 temp_path
+    //             }
+    //             None => continue,
+    //         };
 
-            {
-                let comment = file.comment();
-                if !comment.is_empty() {
-                    println!("File {i} comment: {comment}");
-                }
-            }
+    //         {
+    //             let comment = file.comment();
+    //             if !comment.is_empty() {
+    //                 println!("File {i} comment: {comment}");
+    //             }
+    //         }
 
-            if (*file.name()).ends_with('/') {
-                println!("File {} extracted to \"{}\"", i, outpath.display());
-                fs::create_dir_all(&outpath).unwrap();
-            } else {
-                println!(
-                    "File {} extracted to \"{}\" ({} bytes)",
-                    i,
-                    outpath.display(),
-                    file.size()
-                );
+    //         if (*file.name()).ends_with('/') {
+    //             println!("File {} extracted to \"{}\"", i, outpath.display());
+    //             fs::create_dir_all(&outpath).unwrap();
+    //         } else {
+    //             println!(
+    //                 "File {} extracted to \"{}\" ({} bytes)",
+    //                 i,
+    //                 outpath.display(),
+    //                 file.size()
+    //             );
 
-                if let Some(p) = outpath.parent() {
-                    if !p.exists() {
-                        fs::create_dir_all(p).unwrap();
-                    }
-                }
-                let mut outfile = fs::File::create(&outpath).unwrap();
-                io::copy(&mut file, &mut outfile).unwrap();
-            }
+    //             if let Some(p) = outpath.parent() {
+    //                 if !p.exists() {
+    //                     fs::create_dir_all(p).unwrap();
+    //                 }
+    //             }
+    //             let mut outfile = fs::File::create(&outpath).unwrap();
+    //             io::copy(&mut file, &mut outfile).unwrap();
+    //         }
 
-            // Get and Set permissions
-            #[cfg(unix)]
-            {
-                use std::os::unix::fs::PermissionsExt;
+    //         // Get and Set permissions
+    //         #[cfg(unix)]
+    //         {
+    //             use std::os::unix::fs::PermissionsExt;
 
-                if let Some(mode) = file.unix_mode() {
-                    fs::set_permissions(&outpath, fs::Permissions::from_mode(mode)).unwrap();
-                }
-            }
-        }
+    //             if let Some(mode) = file.unix_mode() {
+    //                 fs::set_permissions(&outpath, fs::Permissions::from_mode(mode)).unwrap();
+    //             }
+    //         }
+    //     }
 
-        Ok(extracted_files)
-    }
+    //     Ok(extracted_files)
+    // }
 
     pub fn apply_update(&mut self) {
         info!("Applying an update...");

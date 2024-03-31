@@ -18,7 +18,7 @@ pub struct WHUpdateClient {
     pub temp_path: PathBuf,
     pub game_path: PathBuf,
     pub game: WHGames,
-    update_files: Vec<String>, 
+    update_files: Vec<PathBuf>, 
     base_updated_files: Vec<PathBuf>, 
     pub remote_version: String,
     pub local_version: Option<String>,
