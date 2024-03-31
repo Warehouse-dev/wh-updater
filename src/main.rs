@@ -62,7 +62,7 @@ fn main() {
 
     term.write_line(wh_logo)
         .expect("Failed to print into term!");
-    println!("{}", cyan.apply_to("Warehouse updater v0.1"));
+    println!("{}", cyan.apply_to("Warehouse updater v1.1"));
     println!("");
 
     let game = WHGames::FOC; //to be configurable

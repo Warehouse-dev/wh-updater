@@ -51,7 +51,7 @@ pub fn update_foc() {
                     },
                 };
                 println!("{:?}",client_update_path);               
-                let _ = updater.unpack_update(client_update_path);
+                updater.unpack_update(client_update_path);
                 updater.create_backup();
                 updater.apply_update();
 
